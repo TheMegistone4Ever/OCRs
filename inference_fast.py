@@ -6,9 +6,9 @@ def infer(image_path: str, scale=1, target_format="png") -> str:
     pass
 
 
-from FAST.models import FAST
+from model import FAST
 import torch
-from FAST.models.utils import fuse_module, rep_model_convert
+from model.utils import fuse_module, rep_model_convert
 from prepare_input import process_image
 
 model = FAST()
@@ -24,9 +24,13 @@ model.load_state_dict(d)
 model = rep_model_convert(model)
 model = fuse_module(model)
 model.eval()
-image = process_image("lp.jpg")
-image['imgs'] = image['imgs'].cuda(non_blocking=True)
 
-with torch.no_grad():
-    outputs = model(**image)
-    print(outputs)
+import numpy as np
+
+image = process_image(r"images\lp.jpg")
+image['imgs']= image['imgs'].cuda(non_blocking=True)
+
+if __name__ == '__main__':
+    with torch.no_grad():
+        outputs = model(**image)
+        print(outputs)
