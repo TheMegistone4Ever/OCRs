@@ -24,4 +24,4 @@ def infer(image_path: str, scale=1, target_format="png") -> str:
 
 
 if __name__ == "__main__":
-    print(infer(r"images/1695573507847.png", scale=1))
+    print(infer(r"images/1695573507847.png"))
