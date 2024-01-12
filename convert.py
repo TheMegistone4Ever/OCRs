@@ -30,6 +30,10 @@ def pth_to_pt(path_to_pth, path_to_pt, net, device, is_detector, quantize=True):
             else:
                 net.load_state_dict(copyStateDict(torch.load(path_to_pth, map_location=device)))
                 net = torch.nn.DataParallel(net).to(device)
+
+            # net.eval()
+            # traced_script_module = torch.jit.script(net)
+            # traced_script_module.save(path_to_pt)
         else:
             if device == 'cpu':
                 state_dict = torch.load(path_to_pth, map_location=device)
@@ -44,16 +48,14 @@ def pth_to_pt(path_to_pth, path_to_pt, net, device, is_detector, quantize=True):
                     except Exception as e:
                         raise e
             else:
-                model = torch.nn.DataParallel(net).to(device)
-                model.load_state_dict(torch.load(path_to_pth, map_location=device))
-
+                net = torch.nn.DataParallel(net).to(device)
+                net.load_state_dict(torch.load(path_to_pth, map_location=device))
         net.eval()
-        example = torch.rand(1, 3, 224, 224)
-        traced_script_module = torch.jit.trace(net, example)
-        traced_script_module.save(path_to_pt)
+        torch.save(net, path_to_pt)
+
     except Exception as e:
         raise e
-    finally:
+    else:
         print(f"Conversion from \"{path_to_pth}\" to \"{path_to_pt}\" is done...")
 
 
@@ -64,6 +66,8 @@ if __name__ == "__main__":
         current_device = "mps"
     else:
         current_device = "cpu"
+
+    current_device = "cpu"
 
     MODEL_PATH = expanduser(r"~\.EasyOCR\model")
     craft_model_path = path_join(MODEL_PATH, "craft_mlt_25k.pth")

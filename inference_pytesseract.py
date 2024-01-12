@@ -6,7 +6,7 @@ from pytesseract import image_to_string
 from PIL import Image
 
 
-def infer(image_path: str, scale=1, target_format="png") -> str:
+def infer(image_path: str, scale=1) -> str:
     """
     Infer text from image using Tesseract OCR.
     :param image_path: Path to an image

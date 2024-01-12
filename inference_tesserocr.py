@@ -3,30 +3,33 @@
 
 from PIL import Image, ImageDraw
 from tesserocr import PyTessBaseAPI, RIL
+from os import remove
+from os.path import splitext
 
 
-def infer(image_path: str, scale=1, target_format="png", language="eng") -> str:
+def infer(image_path: str, scale=1, language="eng") -> str:
     """
     Infer text from image using TesserOCR.
     :param image_path: Path to an image
     :param scale: Scale factor for image
-    :param target_format: Target format for image
     :param language: Language for OCR
     :return: text
     """
     path_data = "tessdata"
 
-    # Apply scaling if needed
-    if scale != 1:
-        # You may need to install the 'pillow' library for this operation
-        img = Image.open(image_path)
-        new_size = (int(img.size[0] * scale), int(img.size[1] * scale))
-        img = img.resize(new_size)
-        img.save(image_path, format=target_format)
+    img = Image.open(image_path)
+    new_size = (int(img.size[0] * scale), int(img.size[1] * scale))
+    img = img.resize(new_size)
 
+    if img.mode == 'RGBA':
+        img = img.convert('RGB')
+
+    path = image_path + ".resized" + splitext(image_path)[1]
+    img.save(path)
     with PyTessBaseAPI(path=path_data, lang=language) as api:
-        api.SetImageFile(image_path)
+        api.SetImageFile(path)
         text = api.GetUTF8Text()
+    remove(path)
 
         # Uncomment the following section if you want to print bounding boxes and confidence levels
         # boxes = api.GetComponentImages(RIL.TEXTLINE, True)

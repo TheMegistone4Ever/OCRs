@@ -1,9 +1,13 @@
+# https://github.com/mindee/doctr
+# https://arxiv.org/pdf/1707.03718.pdf
+# https://arxiv.org/pdf/1507.05717.pdf
+
+
 from doctr.io import DocumentFile
 from doctr.models import ocr_predictor
 
 
-def infer(image_paths: list, show: bool = False, scale: int = 1, target_format: str = "png",
-          model=ocr_predictor(pretrained=True)) -> str:
+def infer(image_paths: list | str, show: bool = False, scale: int = 1, model=ocr_predictor(pretrained=True)) -> str:
     """
     Infer text from a list of images using doctr library.
     :param image_paths: List of image paths
