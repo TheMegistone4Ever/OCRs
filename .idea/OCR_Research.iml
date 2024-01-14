@@ -9,8 +9,11 @@
       <excludeFolder url="file://$MODULE_DIR$/FAST/models/post_processing/pse/build" />
       <excludeFolder url="file://$MODULE_DIR$/FAST/outputs" />
       <excludeFolder url="file://$MODULE_DIR$/FAST/pretrained" />
+      <excludeFolder url="file://$MODULE_DIR$/FAST/dataset" />
+      <excludeFolder url="file://$MODULE_DIR$/FAST/logs" />
+      <excludeFolder url="file://$MODULE_DIR$/images" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 3.10 (OCRs)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

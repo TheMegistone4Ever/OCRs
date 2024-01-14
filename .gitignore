@@ -1,7 +1,6 @@
 # data
-FAST/data
-FAST/dataset
-images
+FAST/data/
+images/
 
 # texts
 *.mat
@@ -17,10 +16,10 @@ images
 *.rar
 
 # logs
-FAST/logs
+FAST/logs/
 
 # pretrained models
-FAST/pretrained
+FAST/pretrained/
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,linux

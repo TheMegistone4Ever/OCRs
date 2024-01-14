@@ -15,7 +15,6 @@ def infer(image_path: str, scale=1, language="eng") -> str:
     :param language: Language for OCR
     :return: text
     """
-    path_data = "tessdata"
 
     img = Image.open(image_path)
     new_size = (int(img.size[0] * scale), int(img.size[1] * scale))
@@ -26,7 +25,7 @@ def infer(image_path: str, scale=1, language="eng") -> str:
 
     path = image_path + ".resized" + splitext(image_path)[1]
     img.save(path)
-    with PyTessBaseAPI(path=path_data, lang=language) as api:
+    with PyTessBaseAPI(lang=language) as api:
         api.SetImageFile(path)
         text = api.GetUTF8Text()
     remove(path)

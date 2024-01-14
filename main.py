@@ -19,10 +19,9 @@ def directory_gen(path):
 def measure_execution_time(infer_function, image_path, iters, directory, **kwargs):
     print(f"Warmup: {infer_function.__module__}, method: {infer_function.__name__}...")
     if directory:
-        image_generator = directory_gen(image_path)
+        file = next(directory_gen(image_path))
         for iteration in range(5):
-            next_img = next(image_generator)
-            infer_function(next_img, **kwargs)
+            infer_function(file, **kwargs)
     else:
         for iteration in range(5):
             infer_function(image_path, **kwargs)
