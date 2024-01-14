@@ -2,6 +2,13 @@
 FAST/data/
 images/
 
+# logs
+FAST/logs/
+FAST/speed_test/
+
+# pretrained models
+FAST/pretrained/
+
 # texts
 *.mat
 *.pdf
@@ -14,12 +21,6 @@ images/
 # archives
 *.zip
 *.rar
-
-# logs
-FAST/logs/
-
-# pretrained models
-FAST/pretrained/
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,linux

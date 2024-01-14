@@ -1,0 +1,37 @@
+# Linear algebra and array operations
+numpy~=1.24.1
+scipy~=1.11.4
+
+# Geometric operations and manipulations
+shapely~=2.0.2
+
+# Progress bar for iterative processes
+tqdm~=4.65.2
+
+# Image processing and computer vision
+scikit-image~=0.22.0
+opencv-python~=4.6.0.66
+
+# Deep learning framework with CUDA support
+torch~=2.1.2+cu118
+torchvision~=0.16.2+cu118
+
+# Compilation of Python code
+Cython~=3.0.7
+
+# Package installation and management
+setuptools~=60.2.0
+
+# Image processing and manipulation
+pillow~=10.2.0
+
+# Data visualization
+matplotlib~=3.8.2
+
+# Optical character recognition
+easyocr~=1.7.1
+tesserocr~=2.6.0
+pytesseract~=0.3.10
+
+# Natural language processing and transformers
+transformers~=4.36.2
