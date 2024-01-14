@@ -21,7 +21,9 @@ and [TrOCR](https://github.com/microsoft/unilm/tree/master/trocr).
 
 ## 1. Installation
 
-To run this project, you need to install the required dependencies. You can use the following command:
+To run this project, you need to install [Python 3.10](https://www.python.org/downloads/release/python-31011) and
+the required dependencies.
+You can use the following command:
 
 ```
 pip install -r requirements.txt
