@@ -28,6 +28,9 @@ pillow~=10.2.0
 # Data visualization
 matplotlib~=3.8.2
 
+# Data manipulation and analysis
+psutil~=5.9.7
+
 # Optical character recognition
 easyocr~=1.7.1
 tesserocr~=2.6.0

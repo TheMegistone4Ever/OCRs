@@ -1,5 +1,7 @@
 import time
+import subprocess
 import matplotlib.pyplot as plt
+import psutil
 from inference_easyocr import infer as infer_easyocr
 from inference_pytesseract import infer as infer_pytesseract
 from inference_fast import infer as infer_fast
@@ -27,6 +29,10 @@ def measure_execution_time(infer_function, image_path, iters, directory, **kwarg
             infer_function(image_path, **kwargs)
 
     times = []
+    cpu_usage = []
+    ram_usage = []
+    gpu_usage = []
+
     if directory:
         image_generator = directory_gen(image_path)
         for iteration in range(iters):
@@ -35,41 +41,71 @@ def measure_execution_time(infer_function, image_path, iters, directory, **kwarg
             infer_function(next_img, **kwargs)
             end_time = time.time()
             times.append(end_time - start_time)
+
+            # Profiling CPU and RAM usage
+            process = psutil.Process(os.getpid())
+            cpu_usage.append(process.cpu_percent())
+            ram_usage.append(process.memory_info().rss / 1024 / 1024)  # in MB
+
+            # Profiling GPU usage
+            gpu_info = subprocess.check_output(
+                ['nvidia-smi', '--query-gpu=utilization.gpu', '--format=csv,noheader,nounits'])
+            gpu_usage.append(float(gpu_info.strip()))
+
             print(f"Module: {infer_function.__module__}, method: {infer_function.__name__}. "
                   f"Iteration {iteration + 1} of {iters} completed...")
     else:
         times = []
+        cpu_usage = []
+        ram_usage = []
+        gpu_usage = []
         for iteration in range(iters):
             start_time = time.time()
             infer_function(image_path, **kwargs)
             end_time = time.time()
             times.append(end_time - start_time)
+
+            # Profiling CPU and RAM usage
+            process = psutil.Process(os.getpid())
+            cpu_usage.append(process.cpu_percent())
+            ram_usage.append(process.memory_info().rss / 1024 / 1024)  # in MB
+
+            # Profiling GPU usage
+            gpu_info = subprocess.check_output(
+                ['nvidia-smi', '--query-gpu=utilization.gpu', '--format=csv,noheader,nounits'])
+            gpu_usage.append(float(gpu_info.strip()))
+
             print(f"Module: {infer_function.__module__}, method: {infer_function.__name__}. "
                   f"Iteration {iteration + 1} of {iters} completed...")
+
     average_time = sum(times) / iters
+    average_cpu = sum(cpu_usage) / iters
+    average_ram = sum(ram_usage) / iters
+    average_gpu = sum(gpu_usage) / iters
+
     print(f"Module: {infer_function.__module__}, method: {infer_function.__name__}. "
           f"Average execution time: {average_time:,.4f} seconds.")
-    return average_time
+    print(f"Average CPU usage: {average_cpu:.2f}%")
+    print(f"Average RAM usage: {average_ram:.2f} MB")
+    print(f"Average GPU usage: {average_gpu:.2f}%")
+
+    return average_time, average_cpu, average_ram, average_gpu
 
 
-def main(path_png, path_jpeg, directory=False, iterations=9):
+def main(path_png, path_jpeg, directory=False, iterations=2):
     # Measure execution times for each inference function with PNG format
-    easyocr_png_time = measure_execution_time(infer_easyocr, path_png, iterations, directory)
-    fast_png_time = measure_execution_time(infer_fast, path_png, iterations, directory)
-    pytesseract_png_time = measure_execution_time(infer_pytesseract, path_png, iterations, directory,
-                                                  scale=3)
-    doctr_png_time = measure_execution_time(infer_doctr, path_png, iterations, directory)
-    tesserocr_png_time = measure_execution_time(infer_tesserocr, path_png, iterations, directory,
-                                                scale=3)
+    easyocr_png_time, easyocr_png_cpu, easyocr_png_ram, easyocr_png_gpu = measure_execution_time(infer_easyocr, path_png, iterations, directory)
+    fast_png_time, fast_png_cpu, fast_png_ram, fast_png_gpu = measure_execution_time(infer_fast, path_png, iterations, directory)
+    pytesseract_png_time, pytesseract_png_cpu, pytesseract_png_ram, pytesseract_png_gpu = measure_execution_time(infer_pytesseract, path_png, iterations, directory, scale=3)
+    doctr_png_time, doctr_png_cpu, doctr_png_ram, doctr_png_gpu = measure_execution_time(infer_doctr, path_png, iterations, directory)
+    tesserocr_png_time, tesserocr_png_cpu, tesserocr_png_ram, tesserocr_png_gpu = measure_execution_time(infer_tesserocr, path_png, iterations, directory, scale=3)
 
     # Measure execution times for each inference function with JPG format
-    easyocr_jpeg_time = measure_execution_time(infer_easyocr, path_jpeg, iterations, directory)
-    fast_jpeg_time = measure_execution_time(infer_fast, path_jpeg, iterations, directory)
-    pytesseract_jpeg_time = measure_execution_time(infer_pytesseract, path_jpeg, iterations, directory,
-                                                   scale=3)
-    doctr_jpeg_time = measure_execution_time(infer_doctr, path_jpeg, iterations, directory)
-    tesserocr_jpeg_time = measure_execution_time(infer_tesserocr, path_jpeg, iterations, directory,
-                                                 scale=3)
+    easyocr_jpeg_time, easyocr_jpeg_cpu, easyocr_jpeg_ram, easyocr_jpeg_gpu = measure_execution_time(infer_easyocr, path_jpeg, iterations, directory)
+    fast_jpeg_time, fast_jpeg_cpu, fast_jpeg_ram, fast_jpeg_gpu = measure_execution_time(infer_fast, path_jpeg, iterations, directory)
+    pytesseract_jpeg_time, pytesseract_jpeg_cpu, pytesseract_jpeg_ram, pytesseract_jpeg_gpu = measure_execution_time(infer_pytesseract, path_jpeg, iterations, directory, scale=3)
+    doctr_jpeg_time, doctr_jpeg_cpu, doctr_jpeg_ram, doctr_jpeg_gpu = measure_execution_time(infer_doctr, path_jpeg, iterations, directory)
+    tesserocr_jpeg_time, tesserocr_jpeg_cpu, tesserocr_jpeg_ram, tesserocr_jpeg_gpu = measure_execution_time(infer_tesserocr, path_jpeg, iterations, directory, scale=3)
 
     # Plotting the results
     labels = ["EasyOCR", "FAST", "PyTesseract", "Doctr", "TesserOCR"]
