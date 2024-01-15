@@ -19,7 +19,7 @@ and [TrOCR](https://github.com/microsoft/unilm/tree/master/trocr).
    - 3.6 [TrOCR](#36-trocr)
 4. [License](#4-license)
 
-## 1. Installation
+## 1 Installation
 
 To run this project, you need to install [Python 3.10](https://www.python.org/downloads/release/python-31011) and
 the required dependencies.
@@ -29,7 +29,7 @@ You can use the following command:
 pip install -r requirements.txt
 ```
 
-## 2. Usage
+## 2 Usage
 
 To run the project, execute the main function in the `main.py` file:
 
@@ -40,39 +40,39 @@ python main.py
 This will measure the execution times for each OCR library on sample images and generate a bar chart to visualize
 the results.
 
-## 3. Inference Functions
+## 3 Inference Functions
 
-### 3.1. EasyOCR
+### 3.1 EasyOCR
 
 EasyOCR is an OCR library based on the EasyOCR model. It provides a straightforward API for text extraction from
 images. [Code](inference_easyocr.py) | [Paper](https://arxiv.org/pdf/1507.05717.pdf)
 
-### 3.2. PyTesseract
+### 3.2 PyTesseract
 
 PyTesseract is a Python wrapper for Google's Tesseract-OCR Engine. It is widely used for text extraction from images.
 [Code](inference_pytesseract.py) |
 [Paper](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/33418.pdf)
 
-### 3.3. Doctr
+### 3.3 Doctr
 
 Doctr is an OCR library that utilizes deep learning models for document analysis. It is suitable for extracting text
 from documents. [Code](inference_doctr.py) | [Paper](https://arxiv.org/pdf/1707.03718.pdf)
 
-### 3.4. TesserOCR
+### 3.4 TesserOCR
 
 TesserOCR is a Python wrapper for Tesseract-OCR. It provides a simple interface for text extraction from images.
 [Code](inference_tesserocr.py)
 
-### 3.5. FAST
+### 3.5 FAST
 
 FAST is an OCR library based on the FAST model. It focuses on efficient and accurate text extraction from images.
 [Code](inference_fast.py) | [Paper](https://arxiv.org/pdf/2111.02394.pdf)
 
-### 3.6. TrOCR
+### 3.6 TrOCR
 
 TrOCR is an OCR library based on the TrOCR model. It uses transformers for text recognition and can handle various
 languages. [Code](inference_trocr.py)
 
-## 4. License
+## 4 License
 
 The project is licensed under the [CC BY-NC 4.0 License](LICENSE.md).
