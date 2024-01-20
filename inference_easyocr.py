@@ -122,16 +122,16 @@ def reformat_input(image):
 
 
 def readtext(image, reader, horizontal_list, free_list, with_detection,
-             decoder='greedy', beamWidth=5, batch_size=4, workers=0, allowlist=None,
+             decoder='greedy', beamWidth=5, batch_size=64, workers=0, allowlist=None,
              blocklist=None, detail=1,
              rotation_info=None, paragraph=False, min_size=20, contrast_ths=0.1, adjust_contrast=0.5, filter_ths=0.003,
              text_threshold=0.7, low_text=0.4, link_threshold=0.4, canvas_size=2560, mag_ratio=1., slope_ths=0.1,
              ycenter_ths=0.5, height_ths=0.5, width_ths=0.5, y_ths=0.5, x_ths=1.0, add_margin=0.1,
              threshold=0.2, bbox_min_score=0.2, bbox_min_size=3, max_candidates=0, output_format='standard'):
-    '''
+    """
     Parameters:
     image: file path or numpy-array or a byte stream object
-    '''
+    """
 
     img, img_cv_grey = reformat_input(image)
 
@@ -298,16 +298,17 @@ def find_bbox(cv_image, text_color=0, padding=0):
 
 
 def main(a=0):
-    input_file = r"images/tesseract_errors"
+    input_file = r"images/cropped/test"
     # cv_image = cv2.imread(input_file)
 
     images = [os.path.join(input_file, file) for file in os.listdir(input_file)]
-    # images = [input_file] * 10
+    # images = ["images/Table.png"] * 100
     decoders = ["greedy", "beamsearch", "wordbeamsearch"]
 
     # decoders = ["wordbeamsearch"]
-    all_time = 0
+
     for decoder in decoders:
+        all_time = 0
         # if decoder != "wordbeamsearch":
         #     continue
 
@@ -340,11 +341,11 @@ def main(a=0):
             # Apply binary thresholding
             # _, cv_image = cv2.threshold(cv_image, 128, 255, cv2.THRESH_BINARY)
 
-            _, cv_image = cv2.threshold(cv_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            # _, cv_image = cv2.threshold(cv_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
             # cv_image = cv2.copyMakeBorder(cv_image, 8, 8, 8, 8, cv2.BORDER_CONSTANT)
 
-            cv_image = cv2.bitwise_not(cv_image)
+            # cv_image = cv2.bitwise_not(cv_image)
 
             # cv2.imshow("image", cv_image)
             # cv2.waitKey(0)
@@ -382,23 +383,28 @@ def main(a=0):
             #
             # background = max(counter, key=counter.get)
 
-            background = 255
-            if top_left_px == bottom_right_px:
-                if top_right_px == top_left_px or bottom_left_px == top_left_px:
-                    background = top_left_px
-                else:
-                    pass
-            else:
-                if top_right_px == bottom_left_px:
-                    background = top_right_px
-                else:
-                    pass
+            # background = 255
+            # if top_left_px == bottom_right_px:
+            #     if top_right_px == top_left_px or bottom_left_px == top_left_px:
+            #         background = top_left_px
+            #     else:
+            #         pass
+            # else:
+            #     if top_right_px == bottom_left_px:
+            #         background = top_right_px
+            #     else:
+            #         pass
 
             border = 4
+            # min_x, min_y, max_x, max_y = find_bbox(cv_image, background)
 
-            min_x, min_y, max_x, max_y = find_bbox(cv_image, background)
+            # full table
+            # cv_image = cv_image[105:572, 373:1175]
 
-            # min_x, min_y, max_x, max_y = 0, 0, cv_image.shape[1] - 1, cv_image.shape[0] - 1
+            # one colum
+            # cv_image = cv_image[120:555, 522:558]
+
+            min_x, min_y, max_x, max_y = 0, 0, cv_image.shape[1] - 1, cv_image.shape[0] - 1
 
             min_x = max(0, min_x - border)
             min_y = max(0, min_y - border)
@@ -409,14 +415,13 @@ def main(a=0):
                 [min_x, max_x, min_y, max_y]
             ]
 
-            # 373, 105,        1175, 572
-            # cv_image = cv_image[105:572, 373:1175]
-            # cv_image = cv2.resize(cv_image, (cv_image.shape[1] * 2, cv_image.shape[0] * 2))
+            # cv_image = cv2.resize(cv_image, (int(cv_image.shape[1] * 1.5), int(cv_image.shape[0] * 1.5)))
 
             start = time()
-            result = readtext(cv_image, reader, horizontal_list, free_list, False, decoder=decoder)
+            result = readtext(cv_image, reader, horizontal_list, free_list, True, decoder=decoder)
             eval_time = time() - start
 
+            cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
             # for res in result:
             #     box = res[0]
             #     pt1 = box[0]
@@ -425,7 +430,7 @@ def main(a=0):
             #     pt1 = int(pt1[0]), int(pt1[1])
             #     pt2 = int(pt2[0]), int(pt2[1])
             #
-            #     cv_image = cv2.rectangle(cv_image, pt1, pt2, (255, 0, 0), 1)
+            #     cv_image = cv2.rectangle(cv_image, pt1, pt2, (0, 0, 255), 2)
             #
             # cv2.imshow("image", cv_image)
             # cv2.waitKey(0)
@@ -433,16 +438,18 @@ def main(a=0):
             if i != 0:
                 all_time += eval_time
 
-            cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
             if len(result) > 0:
                 box = result[0][0]
                 pt1 = box[0]
                 pt2 = box[2]
+                pt1 = int(pt1[0]), int(pt1[1])
+                pt2 = int(pt2[0]), int(pt2[1])
 
                 cv_image = cv2.rectangle(cv_image, pt1, pt2, (255, 0, 0), 1)
 
                 # Display the text result
-                axs[i, 1].text(0.5, 0.5, f"Text: {result[0][-2]}", ha='center', va='center', wrap=True)
+                result_text = "\n".join([res[1] for res in result])
+                axs[i, 1].text(0.5, 0.5, f"Text: {result_text}", ha='center', va='center', wrap=True)
 
             axs[i, 1].axis('off')
 
@@ -456,8 +463,10 @@ def main(a=0):
 
         plt.show()
 
-    print(f"{all_time = }")
-    print(f"{all_time / (len(images) - 1) = }")
+        print(f"{decoder = }")
+        print(f"{all_time = }")
+        print(f"{all_time / (len(images) - 1) / len(decoders) = }")
+        print()
 
 
 def main_benchmark():

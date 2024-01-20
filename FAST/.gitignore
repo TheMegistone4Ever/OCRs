@@ -28,7 +28,6 @@ data
 vis/
 *~
 tmp/
-*.pth
 /.idea
 /models/post_processing/ccl/.idea/workspace.xml
 

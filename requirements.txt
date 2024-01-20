@@ -13,8 +13,10 @@ scikit-image~=0.22.0
 opencv-python~=4.6.0.66
 
 # Deep learning framework with CUDA support
-torch~=2.1.2+cu118
-torchvision~=0.16.2+cu118
+## pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+#torch~=2.1.2+cu118
+#torchvision~=0.16.2+cu118
+#torchaudio~=2.1.2+cu118
 
 # Compilation of Python code
 Cython~=3.0.7
@@ -33,7 +35,8 @@ psutil~=5.9.7
 
 # Optical character recognition
 easyocr~=1.7.1
-tesserocr~=2.6.0
+## pip install https://github.com/simonflueckiger/tesserocr-windows_build/releases/download/tesserocr-v2.6.0-tesseract-5.3.1/tesserocr-2.6.0-cp311-cp311-win_amd64.whl
+#tesserocr~=2.6.0
 pytesseract~=0.3.10
 
 # Natural language processing and transformers
