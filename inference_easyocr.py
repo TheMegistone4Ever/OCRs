@@ -1,3 +1,4 @@
+import math
 import re
 import easyocr
 import numpy as np
@@ -7,13 +8,17 @@ import cv2
 import os
 import sys
 import torch
-from time import time
+from time import time, sleep
 from multiprocessing import Pool, Queue, Process
 from skimage.io._io import imread
 from sys import getsizeof, stderr
 from itertools import chain
 from collections import deque
 import matplotlib.pyplot as plt
+from FifaReader import FifaReader
+from InputItem import InputItem
+
+fifa_reader = FifaReader(["en"])
 
 try:
     from reprlib import repr
@@ -76,10 +81,10 @@ def job(input: Queue, output: Queue):
 
 
 def loadImage(img_file):
-    img = imread(img_file)           # RGB order
+    img = imread(img_file)  # RGB order
     if img.shape[0] == 2: img = img[0]
-    if len(img.shape) == 2 : img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
-    if img.shape[2] == 4:   img = img[:,:,:3]
+    if len(img.shape) == 2: img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+    if img.shape[2] == 4:   img = img[:, :, :3]
     img = np.array(img)
 
     return img
@@ -122,7 +127,7 @@ def reformat_input(image):
 
 
 def readtext(image, reader, horizontal_list, free_list, with_detection,
-             decoder='greedy', beamWidth=5, batch_size=64, workers=0, allowlist=None,
+             decoder='greedy', beamWidth=5, batch_size=8, workers=0, allowlist=None,
              blocklist=None, detail=1,
              rotation_info=None, paragraph=False, min_size=20, contrast_ths=0.1, adjust_contrast=0.5, filter_ths=0.003,
              text_threshold=0.7, low_text=0.4, link_threshold=0.4, canvas_size=2560, mag_ratio=1., slope_ths=0.1,
@@ -298,14 +303,14 @@ def find_bbox(cv_image, text_color=0, padding=0):
 
 
 def main(a=0):
-    input_file = r"images/cropped/test"
+    input_file = r"images/cropped/test/Controls.png"
     # cv_image = cv2.imread(input_file)
 
-    images = [os.path.join(input_file, file) for file in os.listdir(input_file)]
-    # images = ["images/Table.png"] * 100
-    decoders = ["greedy", "beamsearch", "wordbeamsearch"]
+    # images = [os.path.join(input_file, file) for file in os.listdir(input_file)]
+    images = [input_file] * 100
+    # decoders = ["greedy", "beamsearch", "wordbeamsearch"]
 
-    # decoders = ["wordbeamsearch"]
+    decoders = ["wordbeamsearch"]
 
     for decoder in decoders:
         all_time = 0
@@ -318,7 +323,7 @@ def main(a=0):
 
         fig.patch.set_facecolor('#cccccc')
 
-        # k = 0
+        k = -1
         for i, image_path in enumerate(images):
             # if k < 10:
             #     k += 1
@@ -326,7 +331,7 @@ def main(a=0):
             #
             # if k > 10:
             #     break
-            # k += 1
+            k += 1
 
             cv_image = cv2.imread(image_path)
             cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
@@ -357,7 +362,6 @@ def main(a=0):
             # horizontal_list = [
             #     [0, cv_image.shape[1] - 1, 0, cv_image.shape[0] - 1]
             # ]
-
 
             # readtext(image, reader, horizontal_list, free_list, with_detection,
             #          decoder='greedy', beamWidth=5, batch_size=1, workers=0, allowlist=None,
@@ -404,6 +408,8 @@ def main(a=0):
             # one colum
             # cv_image = cv_image[120:555, 522:558]
 
+            scale = 1
+            # cv_image = cv2.resize(cv_image, (int(cv_image.shape[1] * scale), int(cv_image.shape[0] * scale)))
             min_x, min_y, max_x, max_y = 0, 0, cv_image.shape[1] - 1, cv_image.shape[0] - 1
 
             min_x = max(0, min_x - border)
@@ -415,10 +421,27 @@ def main(a=0):
                 [min_x, max_x, min_y, max_y]
             ]
 
-            # cv_image = cv2.resize(cv_image, (int(cv_image.shape[1] * 1.5), int(cv_image.shape[0] * 1.5)))
+            def nearest_power_of_2(x: int) -> int:
+                return 2 ** round(math.log2(x))
+
+            def get_best_batch_size(image_size: int) -> int:
+                x = max(4, int(96 * math.log(0.0005 * image_size)))
+                return nearest_power_of_2(x)
+
+            best_batch_size = get_best_batch_size(cv_image.shape[0] * cv_image.shape[1] // 3)
+            input_item = InputItem.from_path(image_path, scale=scale)
+
+            if k % 1 == 0:
+                sleep(.2)
+                pass
 
             start = time()
-            result = readtext(cv_image, reader, horizontal_list, free_list, True, decoder=decoder)
+
+            # result = readtext(cv_image, reader, horizontal_list, free_list, False, decoder=decoder,
+            #                   batch_size=best_batch_size)
+
+            result = fifa_reader.read(input_item)
+
             eval_time = time() - start
 
             cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
@@ -438,17 +461,21 @@ def main(a=0):
             if i != 0:
                 all_time += eval_time
 
-            if len(result) > 0:
-                box = result[0][0]
-                pt1 = box[0]
-                pt2 = box[2]
-                pt1 = int(pt1[0]), int(pt1[1])
-                pt2 = int(pt2[0]), int(pt2[1])
+            if len(result.result) > 0:
+                result_text = len(result.result)
 
-                cv_image = cv2.rectangle(cv_image, pt1, pt2, (255, 0, 0), 1)
 
-                # Display the text result
-                result_text = "\n".join([res[1] for res in result])
+
+                # box = result[0][0]
+                # pt1 = box[0]
+                # pt2 = box[2]
+                # pt1 = int(pt1[0]), int(pt1[1])
+                # pt2 = int(pt2[0]), int(pt2[1])
+                #
+                # cv_image = cv2.rectangle(cv_image, pt1, pt2, (255, 0, 0), 1)
+                #
+                # # Display the text result
+                # result_text = "\n".join([res[1] for res in result])
                 axs[i, 1].text(0.5, 0.5, f"Text: {result_text}", ha='center', va='center', wrap=True)
 
             axs[i, 1].axis('off')
@@ -465,7 +492,7 @@ def main(a=0):
 
         print(f"{decoder = }")
         print(f"{all_time = }")
-        print(f"{all_time / (len(images) - 1) / len(decoders) = }")
+        print(f"{all_time / (len(images) - 1) = }")
         print()
 
 
@@ -479,7 +506,6 @@ def main_benchmark():
 
     result = readtext(images, decoder=decoder, batch_size=16, n_width=200, n_height=200)
     print(f"{result = }")
-
 
 
 from multiprocessing import Pool
